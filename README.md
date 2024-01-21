@@ -20,6 +20,12 @@ Otherwise, we need to define the .tfvars file during the terraform apply.
 terraform apply -var-file="const.tfvars"
 ```
 
+## Visualize your terraform plan
+```shell
+terraform graph -type=plan | dot -Tpng -o graph.png
+```
+
 ## Learning Source
 * Get started with Azure: https://developer.hashicorp.com/terraform/tutorials/azure-get-started
 * Get started with GCP: https://developer.hashicorp.com/terraform/tutorials/gcp-get-started
+* Visualize your terraform plan: https://medium.com/vmacwrites/tools-to-visualize-your-terraform-plan-d421c6255f9f
