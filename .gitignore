@@ -1,5 +1,8 @@
 # remove the terraform state file to be synced to the git repo  
-.tfstate
+*.tfstate
 # remove the .auto.tfvars to not sync the provider secrets to the git repo
 .auto.tfvars
-
+.terraform/
+.terraform.lock.hcl
+# no state file should be present in the git repo
+terraform.tfstate

@@ -11,6 +11,31 @@ It should never be uploaded to the git repository
 * Setup VS code with HCL project: https://medium.com/nerd-for-tech/how-to-auto-format-hcl-terraform-code-in-visual-studio-code-6fa0e7afbb5e
 * .tfstate Terraform state file: https://linumary.medium.com/terraform-and-its-state-file-concept-d411d48fefbc
 
+## Install terraform on Mac
+```shell
+brew list terraform
+brew install terraform
+brew upgrade terraform
+```
+Reference:
+* https://developer.hashicorp.com/terraform/tutorials/azure-get-started/azure-build
+
+## Install Azure CLI on Mac
+```shell
+brew update && brew install azure-cli
+az login
+```
+Reference:
+* https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-macos
+* https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/service_principal_client_secret
+
+## init terraform
+```shell
+terraform init
+terraform plan
+terraform apply
+```
+
 ## Apply terraform
 
 terraform will take the variables from either `terraform.tfvars` or `.auto.tfvars`
