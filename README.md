@@ -31,13 +31,15 @@ Reference:
 
 ## init terraform
 ```shell
+# init terraform state
 terraform init
+# plan the change shall be made to your cloud resources
 terraform plan
+# executed planed changes defined by HCL 
 terraform apply
 ```
 
 ## Apply terraform
-
 terraform will take the variables from either `terraform.tfvars` or `.auto.tfvars`
 
 Otherwise, we need to define the .tfvars file during the terraform apply.
