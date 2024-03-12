@@ -46,13 +46,57 @@ provider "azurerm" {
 #   features {}
 # }
 
-resource "azurerm_resource_group" "main_rg" {
-  name     = "w1-test-ml-rg"
+# https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/machine_learning_workspace
+data "azurerm_client_config" "current" {}
+
+# Create a resource group on Azure with the variable name main_rg
+resource "azurerm_resource_group" "ml_rg" {
+  name     = "w1-test-ml-rg-1"
   location = "West Europe"
 
   tags = {
     zone = "sandbox"
     owner = "yd"
     app = "ml"
+  }
+}
+
+resource "azurerm_application_insights" "ml_workspace" {
+  name                = "sandbox-ml-app-insight-1"
+  location            = azurerm_resource_group.ml_rg.location
+  resource_group_name = azurerm_resource_group.ml_rg.name
+  application_type    = "web"
+  tags = azurerm_resource_group.ml_rg.tags 
+}
+
+resource "azurerm_key_vault" "ml_workspace" {
+  name                = "sandboxmlkeyvault1"
+  location            = azurerm_resource_group.ml_rg.location
+  resource_group_name = azurerm_resource_group.ml_rg.name
+  tenant_id           = data.azurerm_client_config.current.tenant_id
+  sku_name            = "standard" # "premium"
+  tags = azurerm_resource_group.ml_rg.tags 
+}
+
+resource "azurerm_storage_account" "ml_workspace" {
+  name                     = "sandboxmlstorageaccount1"
+  location                 = azurerm_resource_group.ml_rg.location
+  resource_group_name      = azurerm_resource_group.ml_rg.name
+  account_tier             = "Standard"
+  account_replication_type = "GRS"
+  tags = azurerm_resource_group.ml_rg.tags 
+}
+
+resource "azurerm_machine_learning_workspace" "ml_workspace" {
+  name                    = "sandbox-ml-workspace-1"
+  location                = azurerm_resource_group.ml_rg.location
+  resource_group_name     = azurerm_resource_group.ml_rg.name
+  application_insights_id = azurerm_application_insights.ml_workspace.id
+  key_vault_id            = azurerm_key_vault.ml_workspace.id
+  storage_account_id      = azurerm_storage_account.ml_workspace.id
+  tags = azurerm_resource_group.ml_rg.tags 
+
+  identity {
+    type = "SystemAssigned"
   }
 }
