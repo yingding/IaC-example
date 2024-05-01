@@ -58,6 +58,13 @@ terraform init -upgrade
 ```
 * https://developer.hashicorp.com/terraform/language/expressions/version-constraints
 
+## Destroy
+```shell
+terraform plan -destroy
+terraform apply -destroy
+```
+* https://developer.hashicorp.com/terraform/cli/commands/destroy
+
 ## Learning Source
 * Get started with Azure: https://developer.hashicorp.com/terraform/tutorials/azure-get-started
 * Get started with GCP: https://developer.hashicorp.com/terraform/tutorials/gcp-get-started

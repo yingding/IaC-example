@@ -44,16 +44,15 @@ provider "azurerm" {
       # remove the soft delete azure machine learning workspace
       purge_soft_deleted_workspace_on_destroy = true
     }
+    key_vault {
+      purge_soft_delete_on_destroy = true
+    }
+    resource_group {
+      prevent_deletion_if_contains_resources = false
+    }
   }
 }
 
-# provider "azurerm" {
-#     subscription_id = var.subscription_id
-#     client_id       = var.client_id
-#     client_secret   = var.client_secret
-#     tenant_id       = var.tenant_id
-#   features {}
-# }
 
 # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/machine_learning_workspace
 data "azurerm_client_config" "current" {}
@@ -78,13 +77,17 @@ resource "azurerm_application_insights" "ml_workspace" {
   tags = azurerm_resource_group.ml_rg.tags 
 }
 
+# https://github.com/hashicorp/terraform-provider-azurerm/issues/14674
 resource "azurerm_key_vault" "ml_workspace" {
   name                = "sandboxmlkeyvault1"
   location            = azurerm_resource_group.ml_rg.location
   resource_group_name = azurerm_resource_group.ml_rg.name
   tenant_id           = data.azurerm_client_config.current.tenant_id
   sku_name            = "standard" # "premium"
-  tags = azurerm_resource_group.ml_rg.tags 
+  tags = azurerm_resource_group.ml_rg.tags
+  purge_protection_enabled   = false
+  # provider            = azurerm
+  # soft_delete_retention_days = 7 # soft_delete_retention_days to be in the range (7 - 90)
 }
 
 resource "azurerm_storage_account" "ml_workspace" {
@@ -98,6 +101,7 @@ resource "azurerm_storage_account" "ml_workspace" {
 
 # https://aka.ms/wsoftdelete
 # recently deleted resources from the location.
+# https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/machine_learning_workspace.html
 resource "azurerm_machine_learning_workspace" "ml_workspace" {
   name                    = "sandbox-ml-workspace-1"
   location                = azurerm_resource_group.ml_rg.location
@@ -105,7 +109,8 @@ resource "azurerm_machine_learning_workspace" "ml_workspace" {
   application_insights_id = azurerm_application_insights.ml_workspace.id
   key_vault_id            = azurerm_key_vault.ml_workspace.id
   storage_account_id      = azurerm_storage_account.ml_workspace.id
-  tags = azurerm_resource_group.ml_rg.tags 
+  tags = azurerm_resource_group.ml_rg.tags
+  public_network_access_enabled = true
 
   identity {
     type = "SystemAssigned"
