@@ -23,19 +23,28 @@ variable "my_val" {
     type        = string
 }
 
+# https://developer.hashicorp.com/terraform/language/expressions/version-constraints
+# allows only the rightmost version component to increment ~> 3.101.0
 terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "=3.0.0"
+      version = "~> 3.101.0" # "~>3.0.0" "=3.0.0" 
     }
   }
 }
 
 # Configure the Microsoft Azure Provider
 # using the environment variables instead of the variables directly
+# https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/features-block
+# https://github.com/hashicorp/terraform-provider-azurerm/pull/25624
 provider "azurerm" {
-  features {}
+  features {
+    machine_learning {
+      # remove the soft delete azure machine learning workspace
+      purge_soft_deleted_workspace_on_destroy = true
+    }
+  }
 }
 
 # provider "azurerm" {
@@ -87,6 +96,8 @@ resource "azurerm_storage_account" "ml_workspace" {
   tags = azurerm_resource_group.ml_rg.tags 
 }
 
+# https://aka.ms/wsoftdelete
+# recently deleted resources from the location.
 resource "azurerm_machine_learning_workspace" "ml_workspace" {
   name                    = "sandbox-ml-workspace-1"
   location                = azurerm_resource_group.ml_rg.location

@@ -52,6 +52,12 @@ terraform apply -var-file="const.tfvars"
 terraform graph -type=plan | dot -Tpng -o graph.png
 ```
 
+## Upgrade to new provider version
+```shell
+terraform init -upgrade
+```
+* https://developer.hashicorp.com/terraform/language/expressions/version-constraints
+
 ## Learning Source
 * Get started with Azure: https://developer.hashicorp.com/terraform/tutorials/azure-get-started
 * Get started with GCP: https://developer.hashicorp.com/terraform/tutorials/gcp-get-started
