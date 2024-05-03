@@ -1,5 +1,13 @@
 # IaC-example
-examples of using terraform for multi cloud IaC
+Azure examples of using terraform for multi cloud IaC
+
+This repository contains terraform code for Azure Cloud with Azure Provider to create:
+* Azure ML Studio workspace
+* Storage Account with 
+    * Blob Storage
+    * File Share
+* Azure ML Datastore (Azure Blobstore)
+
 
 ## Setting up Terraform project
 .tfstate file holds all the configurations of the cloud infrastructure that has been created.
