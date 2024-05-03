@@ -73,6 +73,10 @@ terraform apply -destroy
 ```
 * https://developer.hashicorp.com/terraform/cli/commands/destroy
 
+## Terraform Modules
+* terraform modules: https://developer.hashicorp.com/terraform/language/modules
+* developing module: https://developer.hashicorp.com/terraform/language/modules/develop
+
 ## Learning Source
 * Get started with Azure: https://developer.hashicorp.com/terraform/tutorials/azure-get-started
 * Get started with GCP: https://developer.hashicorp.com/terraform/tutorials/gcp-get-started
