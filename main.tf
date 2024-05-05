@@ -188,3 +188,29 @@ resource "azurerm_machine_learning_datastore_blobstorage" "ml_blobstorage_1" {
   # }
   tags = azurerm_resource_group.storage_rg_1.tags
 }
+
+# https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/machine_learning_compute_instance
+# https://github.com/hashicorp/terraform-provider-azurerm/issues/20973#issuecomment-2093776017
+# https://learn.microsoft.com/en-us/azure/virtual-machines/dv2-dsv2-series
+# delete from azure ml studio -> compute instances
+# resource "azurerm_machine_learning_compute_instance" "compute_instance_1" {
+#   name                          = "sandbox-ml-comp-inst1"
+#   machine_learning_workspace_id = azurerm_machine_learning_workspace.ml_workspace.id
+#   virtual_machine_size          = "STANDARD_DS2_V2"
+#   authorization_type            = "personal"
+#   # node_public_ip_enabled        = "false" # subnet_resource_id must be set with false
+#   # ssh {
+#   #   public_key = var.ssh_key
+#   # }
+#   # subnet_resource_id = azurerm_subnet.example.id
+#   description        = "sandbox compute instance 1"
+#   tags = azurerm_resource_group.ml_rg.tags
+#   identity {
+#     type = "SystemAssigned"
+#   }
+
+#   assign_to_user {
+#     object_id = azurerm_machine_learning_workspace.ml_workspace.identity[0].principal_id
+#     tenant_id = data.azurerm_client_config.current.tenant_id
+#   }
+# }
