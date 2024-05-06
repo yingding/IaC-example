@@ -9,4 +9,6 @@
 # no state file should be present in the git repo
 terraform.tfstate
 *.tfstate.backup 
+terraform.tfvars
+
 

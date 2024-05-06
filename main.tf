@@ -18,8 +18,8 @@ variable "tenant_id" {
   type        = string
 }
 
-variable "my_val" {
-  description = "The client ID for the service principal"
+variable "user_id" {
+  description = "The user ID for the microsoft entra user"
   type        = string
 }
 
@@ -29,7 +29,11 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 3.101.0" # "~>3.0.0" 
+      version = "~> 3.102.0" # "~>3.0.0" 
+    }
+    azuread = {
+      source  = "hashicorp/azuread"
+      version = "~> 2.48.0"
     }
   }
 }
@@ -56,6 +60,7 @@ provider "azurerm" {
 
 # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/machine_learning_workspace
 data "azurerm_client_config" "current" {}
+data "azuread_client_config" "current" {}
 
 # Create a resource group on Azure with the variable name main_rg
 resource "azurerm_resource_group" "ml_rg" {
@@ -189,28 +194,47 @@ resource "azurerm_machine_learning_datastore_blobstorage" "ml_blobstorage_1" {
   tags = azurerm_resource_group.storage_rg_1.tags
 }
 
+# https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/resources/application_owner
+# data "azuread_application_registration" "current_entra_app" {
+#   display_name = "azure-cli-2024-03-09-18-07-11"
+# }
+
+# https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/resources/application_owner
+# https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/resources/application
+data "azuread_application" "current_entra_app" {
+  object_id = data.azurerm_client_config.current.client_id
+}
+
+output "current_entra_app" {
+  value = data.azuread_application.current_entra_app.owners
+}
+
+
 # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/machine_learning_compute_instance
 # https://github.com/hashicorp/terraform-provider-azurerm/issues/20973#issuecomment-2093776017
 # https://learn.microsoft.com/en-us/azure/virtual-machines/dv2-dsv2-series
 # delete from azure ml studio -> compute instances
-# resource "azurerm_machine_learning_compute_instance" "compute_instance_1" {
-#   name                          = "sandbox-ml-comp-inst1"
-#   machine_learning_workspace_id = azurerm_machine_learning_workspace.ml_workspace.id
-#   virtual_machine_size          = "STANDARD_DS2_V2"
-#   authorization_type            = "personal"
-#   # node_public_ip_enabled        = "false" # subnet_resource_id must be set with false
-#   # ssh {
-#   #   public_key = var.ssh_key
-#   # }
-#   # subnet_resource_id = azurerm_subnet.example.id
-#   description        = "sandbox compute instance 1"
-#   tags = azurerm_resource_group.ml_rg.tags
-#   identity {
-#     type = "SystemAssigned"
-#   }
+resource "azurerm_machine_learning_compute_instance" "compute_instance_1" {
+  name                          = "sandbox-ml-comp-inst1"
+  machine_learning_workspace_id = azurerm_machine_learning_workspace.ml_workspace.id
+  virtual_machine_size          = "Standard_D2s_v3" # "STANDARD_DS2_V2" 
+  # authorization_type            = "personal"
+  # node_public_ip_enabled        = "false" # subnet_resource_id must be set with false
+  # ssh {
+  #   public_key = var.ssh_key
+  # }
+  # subnet_resource_id = azurerm_subnet.example.id
+  description        = "sandbox compute instance 1"
+  tags = azurerm_resource_group.ml_rg.tags
+  # this will create a principal id for the compute instance
+  # identity {
+  #   type = "SystemAssigned"
+  # }
 
-#   assign_to_user {
-#     object_id = azurerm_machine_learning_workspace.ml_workspace.identity[0].principal_id
-#     tenant_id = data.azurerm_client_config.current.tenant_id
-#   }
-# }
+  assign_to_user {
+    object_id = user_id
+    # object_id = data.azuread_client_config.current.object_id
+    # object_id = azurerm_machine_learning_workspace.ml_workspace.identity[0].principal_id
+    tenant_id = data.azurerm_client_config.current.tenant_id
+  }
+}
