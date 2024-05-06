@@ -195,25 +195,24 @@ resource "azurerm_machine_learning_datastore_blobstorage" "ml_blobstorage_1" {
 }
 
 # https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/resources/application_owner
-# data "azuread_application_registration" "current_entra_app" {
-#   display_name = "azure-cli-2024-03-09-18-07-11"
+# https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/resources/application
+# data "azuread_application" "current_entra_app" {
+#   object_id = data.azurerm_client_config.current.client_id
 # }
 
-# https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/resources/application_owner
-# https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/resources/application
-data "azuread_application" "current_entra_app" {
-  object_id = data.azurerm_client_config.current.client_id
-}
-
-output "current_entra_app" {
-  value = data.azuread_application.current_entra_app.owners
-}
+# output "current_entra_app" {
+#   value = data.azuread_application.current_entra_app.owners
+# }
 
 
 # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/machine_learning_compute_instance
 # https://github.com/hashicorp/terraform-provider-azurerm/issues/20973#issuecomment-2093776017
 # https://learn.microsoft.com/en-us/azure/virtual-machines/dv2-dsv2-series
 # delete from azure ml studio -> compute instances
+# Notice:
+# delete the computed instance, if you don't need it.check "
+# If you stop, the ci is not charged, but there is Load balancer active, you will be charged for that at AML_DEV
+# https://stackoverflow.com/questions/75217339/does-azure-machine-learning-charge-for-compute-instances-even-when-they-are-stop
 resource "azurerm_machine_learning_compute_instance" "compute_instance_1" {
   name                          = "sandbox-ml-comp-inst1"
   machine_learning_workspace_id = azurerm_machine_learning_workspace.ml_workspace.id
@@ -224,6 +223,10 @@ resource "azurerm_machine_learning_compute_instance" "compute_instance_1" {
   #   public_key = var.ssh_key
   # }
   # subnet_resource_id = azurerm_subnet.example.id
+  
+  # TODO: edit Schedules Idle shutdown schedule 15 minutes from the details plane of compute instance in azure ml studio portal
+  # idleTimeBeforeShutdown = "PT15M"
+
   description        = "sandbox compute instance 1"
   tags = azurerm_resource_group.ml_rg.tags
   # this will create a principal id for the compute instance
@@ -232,7 +235,8 @@ resource "azurerm_machine_learning_compute_instance" "compute_instance_1" {
   # }
 
   assign_to_user {
-    object_id = user_id
+    # find from the azure portal, can not be read dynamically
+    object_id = var.user_id
     # object_id = data.azuread_client_config.current.object_id
     # object_id = azurerm_machine_learning_workspace.ml_workspace.identity[0].principal_id
     tenant_id = data.azurerm_client_config.current.tenant_id
