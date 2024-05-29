@@ -1,63 +1,3 @@
-variable "subscription_id" {
-  description = "The subscription ID for the service principal"
-  type        = string
-}
-
-variable "client_id" {
-  description = "The client ID for the service principal"
-  type        = string
-}
-
-variable "client_secret" {
-  description = "The client secret for the service principal"
-  type        = string
-}
-
-variable "tenant_id" {
-  description = "The tenant ID for the service principal"
-  type        = string
-}
-
-variable "user_id" {
-  description = "The user ID for the microsoft entra user"
-  type        = string
-}
-
-# https://developer.hashicorp.com/terraform/language/expressions/version-constraints
-# allows only the rightmost version component to increment ~> 3.101.0
-terraform {
-  required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "~> 3.102.0" # "~>3.0.0" 
-    }
-    azuread = {
-      source  = "hashicorp/azuread"
-      version = "~> 2.48.0"
-    }
-  }
-}
-
-# Configure the Microsoft Azure Provider
-# using the environment variables instead of the variables directly
-# https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/features-block
-# https://github.com/hashicorp/terraform-provider-azurerm/pull/25624
-provider "azurerm" {
-  features {
-    machine_learning {
-      # remove the soft delete azure machine learning workspace
-      purge_soft_deleted_workspace_on_destroy = true
-    }
-    key_vault {
-      purge_soft_delete_on_destroy = true
-    }
-    resource_group {
-      prevent_deletion_if_contains_resources = false
-    }
-  }
-}
-
-
 # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/machine_learning_workspace
 data "azurerm_client_config" "current" {}
 data "azuread_client_config" "current" {}
@@ -101,6 +41,7 @@ resource "azurerm_storage_account" "ml_workspace" {
   resource_group_name      = azurerm_resource_group.ml_rg.name
   account_tier             = "Standard"
   account_replication_type = "GRS"
+  allow_nested_items_to_be_public = false # default is true
   tags                     = azurerm_resource_group.ml_rg.tags
 }
 
@@ -213,32 +154,33 @@ resource "azurerm_machine_learning_datastore_blobstorage" "ml_blobstorage_1" {
 # delete the computed instance, if you don't need it.check "
 # If you stop, the ci is not charged, but there is Load balancer active, you will be charged for that at AML_DEV
 # https://stackoverflow.com/questions/75217339/does-azure-machine-learning-charge-for-compute-instances-even-when-they-are-stop
-resource "azurerm_machine_learning_compute_instance" "compute_instance_1" {
-  name                          = "sandbox-ml-comp-inst1"
-  machine_learning_workspace_id = azurerm_machine_learning_workspace.ml_workspace.id
-  virtual_machine_size          = "Standard_D2s_v3" # "STANDARD_DS2_V2" 
-  # authorization_type            = "personal"
-  # node_public_ip_enabled        = "false" # subnet_resource_id must be set with false
-  # ssh {
-  #   public_key = var.ssh_key
-  # }
-  # subnet_resource_id = azurerm_subnet.example.id
+
+# resource "azurerm_machine_learning_compute_instance" "compute_instance_1" {
+#   name                          = "sandbox-ml-comp-inst1"
+#   machine_learning_workspace_id = azurerm_machine_learning_workspace.ml_workspace.id
+#   virtual_machine_size          = "Standard_D2s_v3" # "STANDARD_DS2_V2" 
+#   # authorization_type            = "personal"
+#   # node_public_ip_enabled        = "false" # subnet_resource_id must be set with false
+#   # ssh {
+#   #   public_key = var.ssh_key
+#   # }
+#   # subnet_resource_id = azurerm_subnet.example.id
   
-  # TODO: edit Schedules Idle shutdown schedule 15 minutes from the details plane of compute instance in azure ml studio portal
-  # idleTimeBeforeShutdown = "PT15M"
+#   # TODO: edit Schedules Idle shutdown schedule 15 minutes from the details plane of compute instance in azure ml studio portal
+#   # idleTimeBeforeShutdown = "PT15M"
 
-  description        = "sandbox compute instance 1"
-  tags = azurerm_resource_group.ml_rg.tags
-  # this will create a principal id for the compute instance
-  # identity {
-  #   type = "SystemAssigned"
-  # }
+#   description        = "sandbox compute instance 1"
+#   tags = azurerm_resource_group.ml_rg.tags
+#   # this will create a principal id for the compute instance
+#   # identity {
+#   #   type = "SystemAssigned"
+#   # }
 
-  assign_to_user {
-    # find from the azure portal, can not be read dynamically
-    object_id = var.user_id
-    # object_id = data.azuread_client_config.current.object_id
-    # object_id = azurerm_machine_learning_workspace.ml_workspace.identity[0].principal_id
-    tenant_id = data.azurerm_client_config.current.tenant_id
-  }
-}
+#   assign_to_user {
+#     # find from the azure portal, can not be read dynamically
+#     object_id = var.user_id
+#     # object_id = data.azuread_client_config.current.object_id
+#     # object_id = azurerm_machine_learning_workspace.ml_workspace.identity[0].principal_id
+#     tenant_id = data.azurerm_client_config.current.tenant_id
+#   }
+# }

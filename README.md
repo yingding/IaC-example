@@ -8,6 +8,24 @@ This repository contains terraform code for Azure Cloud with Azure Provider to c
     * File Share
 * Azure ML Datastore (Azure Blobstore)
 
+## Install terraform on MacOSX
+```shell
+brew update
+brew install terraform
+brew upgrade
+```
+
+```shell
+brew update && brew upgrade terraform && brew cleanup terraform
+```
+
+```shell
+brew cleanup --dry-run
+# brew cleanup -n
+brew cleanup
+```
+* https://stackoverflow.com/questions/65502748/why-doesnt-brew-cleanup-or-brew-cleanup-n-show-any-output
+
 
 ## Setting up Terraform project
 .tfstate file holds all the configurations of the cloud infrastructure that has been created.
@@ -83,3 +101,5 @@ terraform apply -destroy
 * Visualize your terraform plan: https://medium.com/vmacwrites/tools-to-visualize-your-terraform-plan-d421c6255f9f
 * create Azure ML Compute Instance: https://github.com/hashicorp/terraform-provider-azurerm/issues/20973#issuecomment-2093776017
 * see principle in application from microsoft entra admin center
+* Multi az tenant application: https://stackoverflow.com/questions/74558631/terraform-authenticating-to-azure-by-service-principal-and-client-secret
+* Structure Terraform project https://spacelift.io/blog/terraform-files
